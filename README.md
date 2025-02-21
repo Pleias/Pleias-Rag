@@ -1,3 +1,11 @@
+# Pleias RAG
+
+Pleias RAG models are designed for Retrieval Augmented Generation (RAG) tasks. These models are optimized for structured input/output formats to ensure accurate source citation and minimize hallucinations.
+
+This library serves the purpose of providing a simple interface to Pleias RAG models. It included both components for creating a database of sources, seaching for relevant sources and generating answers based on the sources. 
+
+
+
 # Pleias RAG Models
 
 Pleias has developed a specialized line of language models designed specifically for Retrieval Augmented Generation (RAG). These models feature structured input/output formats to ensure accurate source citation and minimize hallucinations.
