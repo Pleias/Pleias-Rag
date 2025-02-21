@@ -1,10 +1,17 @@
-# Pleias Pico
+# Pleias RAG Models
 
-Pleias Pico is a specialized language model developed by Pleias, designed specifically for Retrieval Augmented Generation (RAG). The model features a structured input/output format to ensure accurate source citation and minimize hallucinations.
+Pleias has developed a specialized line of language models designed specifically for Retrieval Augmented Generation (RAG). These models feature structured input/output formats to ensure accurate source citation and minimize hallucinations.
 
+## Model Lineup
+
+The Pleias RAG models come in different sizes to accommodate various use cases and computational requirements:
+
+- Pleias Pico: (inlcude parameter numbers)
+- Pleias Nano: (include parameter numbers)
+  
 ## Input Format
 
-The model accepts input in the following format:
+The models accept input in the following format:
 
 ```
 <|query_start|>{user question}<|query_end|>
@@ -15,15 +22,31 @@ The model accepts input in the following format:
 
 ## Output Format
 
-The model generates output in two distinct sections:
+The models generate output in two distinct sections:
 
-1. Source Analysis: Following the `<|source_analysis_start|>` token, the model provides a brief analysis of the provided sources in the context of the query.
+1. Source Analysis: Following the `<|source_analysis_start|>` token, the models provide brief analyses of the provided sources in the context of the query.
+2. Answer: The models then generate their responses using the following structure:
 
-2. Answer: The model then generates its response using the following structure:
 ```
 {source analysis}<|source_analysis_end|>
 <|answer_start|>{model answer}<|answer_end|>
+
 ```
+
+## Generation Parameters
+
+We reccomend the following parameters for generation with vllm: 
+```
+SamplingParams(
+           temperature=0.0,
+           top_p=0.95,
+           max_tokens=1200,
+           repetition_penalty=1,
+           stop=["#END#"],
+           skip_special_tokens=False,
+       )
+```
+Especially important is closely following the input format and keeping the temperature 0.
 
 ## Example
 
@@ -40,21 +63,26 @@ Output:
 {source analysis}
 <|source_analysis_end|>
 <|answer_start|>
-{model's answer to the query}
+{models' answers to the query}
 <|answer_end|>
 ```
 
 ## Features
-- Structured input/output format for easy parsing
-- Built-in source analysis
-- Explicit source citation
+
+The Pleias RAG models share these core capabilities:
+
+- Structured input/output formats for easy parsing
+- Built-in source analysis capabilities
+- Explicit source citation mechanisms
 - Designed to minimize hallucinations
 - Specialized for RAG applications
 
 ## Usage
 
-The model's structured format makes it particularly suitable for applications requiring:
+These models' structured formats make them particularly suitable for applications requiring:
+
 - Source-based responses
-- Transparent reasoning
+- Transparent reasoning processes
 - Easy output parsing
 - Reliable source attribution
+
