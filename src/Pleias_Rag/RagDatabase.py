@@ -28,6 +28,11 @@ class RagDatabase:
     """
     A database for storing and searching documents with text chunking capabilities.
     Includes LanceDB integration for persistent storage and vector search.
+    Initialization parameters:
+    - search_type: "bm25" or "vector" for BM25 search or vector similarity search
+    - default_max_segment: Maximum number of words per chunk
+    - db_path: Path to the LanceDB directory
+    - embeddings_model: SentenceTransformer model for vector search
     """
 
     def __init__(
