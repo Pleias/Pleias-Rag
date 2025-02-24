@@ -1,20 +1,10 @@
-from .types import (
-    SearchType,
-    ChunkingStrategy,
-    ChunkingParams,
-    Document,
-    ChunkedDocument
-)
-from .RagDatabase import RagDatabase
-from .database_chunking_strategies import BasicChunker, BasicChunkingParams
+from .RagDatabase import RagDatabase, Document, ChunkedDocument
+from .database_chunking_strategies.chunk_text import chunk_text
+
 
 __all__ = [
     'RagDatabase',
     'Document',
     'ChunkedDocument',
-    'ChunkingStrategy',
-    'SearchType',
-    'ChunkingParams',
-    'BasicChunker',
-    'BasicChunkingParams'
+    'chunk_text'
 ]
