@@ -1,4 +1,3 @@
-from .BasicChunker import BasicChunker, BasicChunkingParams
-from .BaseChunker import BaseChunker
+from .chunk_text import chunk_text
 
-__all__ = ['BasicChunker', 'BasicChunkingParams', 'BaseChunker']
+__all__ = ['chunk_text']
