@@ -1,6 +1,15 @@
 import unittest
-from ../src/Pleias-Rag import RagDatabase, Document, ChunkingStrategy, SearchType
+import sys
+import os
+from pathlib import Path
 
+# Add the project root to Python path
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root / "src"))
+
+from Pleias_Rag import RagDatabase, Document, ChunkingStrategy, SearchType
+
+# Rest of your test code remains the same...
 class TestRagDatabase(unittest.TestCase):
     def setUp(self):
         """Set up a database instance before each test."""

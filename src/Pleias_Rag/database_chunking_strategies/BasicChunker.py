@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
-from typing import List, Optional
+from dataclasses import dataclass
+from typing import List
 import re
-from ./BaseChunker import BaseChunker
+from .BaseChunker import BaseChunker
+from ..types import ChunkingParams
 
 @dataclass
 class BasicChunkingParams(ChunkingParams):
