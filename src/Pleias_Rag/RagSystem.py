@@ -229,7 +229,7 @@ if __name__ == "__main__":
         db_path="data/rag_system_db",
         embeddings_model="all-MiniLM-L6-v2",
         chunk_size=300,
-        model_path="meta-llama/Llama-2-7b-chat-hf"  # Initialize with model
+        model_path="./pleias_350m_late"  # Initialize with model
     )
     
     # Add documents
