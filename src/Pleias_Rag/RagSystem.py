@@ -1,13 +1,14 @@
 from typing import Dict, Any, Optional, List, Union, Tuple
 import os
+from vllm import LLM, SamplingParams
 
 # Import the RagDatabase from your module
 from .RagDatabase import RagDatabase, Document, ChunkedDocument
-from .Generate import Generate
+
 class RagSystem:
     """
     A wrapper around RagDatabase that provides direct access to the database
-    functionality through passthrough methods.
+    functionality through passthrough methods and includes generation capabilities.
     """
     
     def __init__(
@@ -15,7 +16,13 @@ class RagSystem:
         search_type: str = "vector",
         db_path: str = "data/lancedb",
         embeddings_model: str = "all-MiniLM-L6-v2",
-        chunk_size: int = 300
+        chunk_size: int = 300,
+        model_path: Optional[str] = None,
+        max_tokens: int = 2048,
+        temperature: float = 0.0,
+        top_p: float = 0.95,
+        repitition_penalty: float = 1.0,
+        trust_remote_code: bool = True
     ) -> None:
         """
         Initialize the RAG system.
@@ -25,12 +32,24 @@ class RagSystem:
             db_path: Path to store the database
             embeddings_model: Model name for sentence embeddings
             chunk_size: Default chunk size for documents
+            model_path: Path to the vLLM model (optional, can be set later)
+            max_tokens: Maximum number of tokens to generate
+            temperature: Sampling temperature for generation
+            top_p: Top-p parameter for generation
+            trust_remote_code: Whether to trust remote code in model repo
         """
         self.config = {
             "search_type": search_type,
             "db_path": db_path,
             "embeddings_model": embeddings_model,
-            "chunk_size": chunk_size
+            "chunk_size": chunk_size,
+            "generation": {
+                "model_path": model_path,
+                "max_tokens": max_tokens,
+                "temperature": temperature,
+                "top_p": top_p,
+                "trust_remote_code": trust_remote_code
+            }
         }
         
         # Create the database directory if it doesn't exist
@@ -43,6 +62,35 @@ class RagSystem:
             db_path=db_path,
             embeddings_model=embeddings_model
         )
+        
+        # Generator attributes
+        self.llm = None
+        self.sampling_params = SamplingParams(
+            temperature=temperature,
+            top_p=top_p,
+            max_tokens=max_tokens
+        )
+        
+        # Initialize the model if path is provided
+        if model_path:
+            self.load_model(model_path, trust_remote_code)
+    
+    def load_model(self, model_path: str, trust_remote_code: bool = True) -> None:
+        """
+        Load the vLLM model for generation.
+        
+        Args:
+            model_path: Path to the model or HuggingFace model name
+            trust_remote_code: Whether to trust remote code in model repo
+        """
+        print(f"Loading model from {model_path}...")
+        self.llm = LLM(
+            model=model_path,
+            trust_remote_code=trust_remote_code
+        )
+        self.config["generation"]["model_path"] = model_path
+        print("Model loaded successfully")
+    
     
     # Direct passthrough methods to access database functionality
     
@@ -90,6 +138,55 @@ class RagSystem:
         
         return formatted_output
     
+    def generate(self, formatted_prompt: str) -> str:
+        """
+        Generate a response from a formatted prompt with special tokens.
+        
+        Args:
+            formatted_prompt: A prompt formatted with special tokens for RAG
+            
+        Returns:
+            Generated text response
+        """
+        if self.llm is None:
+            raise ValueError("Model not loaded. Call load_model() first or initialize with model_path.")
+            
+        outputs = self.llm.generate(formatted_prompt, self.sampling_params)
+        
+        # Extract generated text
+        return outputs[0].outputs[0].text
+    
+    def query(self, query: str, limit: int = 5) -> Dict[str, Any]:
+        """
+        End-to-end RAG query processing: search, format, and generate response.
+        
+        Args:
+            query: User query string
+            limit: Maximum number of search results to retrieve
+            
+        Returns:
+            Dictionary containing query, search results, and generated response
+        """
+        if self.llm is None:
+            raise ValueError("Model not loaded. Call load_model() first or initialize with model_path.")
+        
+        # Retrieve relevant documents
+        search_results = self.vector_search(query, limit)
+        
+        # Format prompt for the model
+        formatted_prompt = self.format_for_rag_model(query, search_results)
+        
+        # Generate response
+        response = self.generate(formatted_prompt)
+        
+        # Return comprehensive result
+        return {
+            "query": query,
+            "search_results": search_results,
+            "formatted_prompt": formatted_prompt,
+            "response": response
+        }
+    
     def get_stats(self) -> Dict[str, Any]:
         """
         Get basic statistics about the RAG system.
@@ -101,7 +198,8 @@ class RagSystem:
             "config": self.config,
             "document_count": len(self.db.documents),
             "chunk_count": len(self.db.chunked_documents),
-            "search_type": self.config["search_type"]
+            "search_type": self.config["search_type"],
+            "model_loaded": self.llm is not None
         }
     
     @property
@@ -119,44 +217,32 @@ class RagSystem:
         return len(self.db)
     
     def __repr__(self) -> str:
-        return f"RagSystem(documents={len(self.db.documents)}, chunks={len(self.db.chunked_documents)})"
+        model_info = f", model={self.config['generation']['model_path']}" if self.llm else ", no model"
+        return f"RagSystem(documents={len(self.db.documents)}, chunks={len(self.db.chunked_documents)}{model_info})"
 
 
 # Example usage
 if __name__ == "__main__":
-    # Initialize the RAG system
+    # Initialize the RAG system with model
     rag_system = RagSystem(
         search_type="vector",
         db_path="data/rag_system_db",
         embeddings_model="all-MiniLM-L6-v2",
-        chunk_size=300
+        chunk_size=300,
+        model_path="meta-llama/Llama-2-7b-chat-hf"  # Initialize with model
     )
     
-    # Use the direct methods
-    rag_system.add_and_chunk_documents(["This is a sample document about artificial intelligence.",
-                                        "Machine learning is a subset of artificial intelligence that involves training models on data.",
-                                        "Neural networks are a type of machine learning model inspired by the human brain."])
+    # Add documents
+    rag_system.add_and_chunk_documents([
+        "Neural networks are a type of machine learning model inspired by the human brain.",
+        "GPT is a generative pre-trained transformer model developed by OpenAI.",
+        "RAG (Retrieval-Augmented Generation) combines retrieval systems with language models."
+    ])
     
-    # Search for documents
-    query = "What is artificial intelligence?"
-    results = rag_system.vector_search(query)
+    # End-to-end query
+    query = "What are neural networks?"
+    result = rag_system.query(query)
     
     # Print results
-    print(f"Search results for '{query}':")
-    for i, result in enumerate(results, 1):
-        print(f"{i}. {result['text'][:100]}... (score: {result['score']:.4f})")
-    
-    # Format results for RAG model
-    formatted_results = rag_system.format_for_rag_model(query, results)
-    print("\nFormatted for RAG model:")
-    print(formatted_results)
-    
-    # Print system stats
-    print("\nSystem stats:")
-    stats = rag_system.get_stats()
-    for key, value in stats.items():
-        print(f"{key}: {value}")
-    
-    # Show document count using property
-    print(f"\nTotal documents: {len(rag_system.documents)}")
-    print(f"Total chunks: {len(rag_system.chunked_documents)}")
+    print(f"Query: {result['query']}")
+    print(f"Response: {result['response']}")

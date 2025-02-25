@@ -10,9 +10,10 @@ class RAGGenerator:
     def __init__(
         self,
         model_path: str,
-        max_tokens: int = 1024,
-        temperature: float = 0.7,
-        top_p: float = 0.9,
+        max_tokens: int = 2048,
+        temperature: float = 0.0,
+        top_p: float = 0.95,
+        repitition_penalty: float = 1.0,
         trust_remote_code: bool = True
     ):
         """
@@ -39,7 +40,8 @@ class RAGGenerator:
         self.sampling_params = SamplingParams(
             temperature=temperature,
             top_p=top_p,
-            max_tokens=max_tokens
+            max_tokens=max_tokens, 
+            repitition_penalty=repitition_penalty
         )
     
     def generate(self, formatted_prompt: str) -> str:

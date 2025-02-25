@@ -23,14 +23,14 @@ pip install .
 
 ```python
 from Pleias_Rag.main import RagSystem
-from Pleias_Rag.Generate import RAGGenerator
 
-# Initialize the RAG system
+# Initialize the RAG system with an optional model path
 rag_system = RagSystem(
     search_type="vector",
     db_path="data/rag_system_db",
     embeddings_model="all-MiniLM-L6-v2",
-    chunk_size=300
+    chunk_size=300,
+    model_path="meta-llama/Llama-2-7b-chat-hf"  # Optional - can also load model later
 )
 
 # Add documents to the system
@@ -40,14 +40,6 @@ rag_system.add_and_chunk_documents([
     "RAG (Retrieval-Augmented Generation) combines retrieval systems with language models."
 ])
 
-# Initialize the generator
-generator = RAGGenerator(
-    model_path="path/to/your/model"  # Replace with actual model path
-)
-
-# Set the generator in the system
-rag_system.set_generator(generator)
-
 # End-to-end RAG query
 query = "What are neural networks?"
 result = rag_system.query(query)
@@ -55,6 +47,26 @@ result = rag_system.query(query)
 # Access the results
 print(f"Query: {result['query']}")
 print(f"Response: {result['response']}")
+```
+
+### Loading a Model Later
+
+```python
+# Initialize without a model
+rag_system = RagSystem(
+    search_type="vector",
+    db_path="data/rag_system_db",
+    embeddings_model="all-MiniLM-L6-v2"
+)
+
+# Add documents
+rag_system.add_and_chunk_documents(["Sample document text"])
+
+# Load model when needed
+rag_system.load_model("meta-llama/Llama-2-7b-chat-hf")
+
+# Now you can generate responses
+result = rag_system.query("What is the document about?")
 ```
 
 ### Document Management
@@ -74,9 +86,10 @@ rag_system.add_pre_chunked_documents(chunks, metadata={"source": "manual chunkin
 stats = rag_system.get_stats()
 print(f"Documents: {stats['document_count']}")
 print(f"Chunks: {stats['chunk_count']}")
+print(f"Model loaded: {stats['model_loaded']}")
 ```
 
-### Search and Format
+### Search and Generate Separately
 
 ```python
 # Search for relevant documents
@@ -87,7 +100,10 @@ results = rag_system.vector_search(query, limit=3)
 formatted_prompt = rag_system.format_for_rag_model(query, results)
 
 # Generate a response directly from formatted prompt
-response = generator.generate(formatted_prompt)
+response = rag_system.generate(formatted_prompt)
+
+# Print the response
+print(response)
 ```
 
 ## Advanced Usage
@@ -130,6 +146,28 @@ Pleias RAG models expect input in a specific format with special tokens:
 
 The model will generate a response based on the provided sources.
 
+## Generation Parameters
+
+When initializing the RagSystem, you can configure generation parameters:
+
+```python
+rag_system = RagSystem(
+    # Database parameters
+    search_type="vector",
+    db_path="data/rag_system_db",
+    embeddings_model="all-MiniLM-L6-v2",
+    chunk_size=300,
+    
+    # Generation parameters
+    model_path="meta-llama/Llama-2-7b-chat-hf",
+    max_tokens=2048,            # Maximum generated tokens
+    temperature=0.0,            # Controls randomness (0.0 = deterministic)
+    top_p=0.95,                 # Nucleus sampling parameter
+    repitition_penalty=1.0,     # Repetition penalty
+    trust_remote_code=True      # Whether to trust remote code in model repo
+)
+```
+
 ## Model Compatibility
 
 This library is designed to work with any model that follows the Pleias RAG input/output format. It has been tested with:
@@ -147,7 +185,8 @@ This library is designed to work with any model that follows the Pleias RAG inpu
 ## License
 
 [Your license information here]
-```
+
+
 # Pleias RAG Models
 
 Pleias has developed a specialized line of language models designed specifically for Retrieval Augmented Generation (RAG). These models feature structured input/output formats to ensure accurate source citation and minimize hallucinations.
