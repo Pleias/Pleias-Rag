@@ -148,7 +148,7 @@ The model will generate a response based on the provided sources.
 
 ## Generation Parameters
 
-When initializing the RagSystem, you can configure generation parameters:
+When initializing the RagSystem, you can configure generation parameters. It is reccomended to use the following parameters for Pleias models:
 
 ```python
 rag_system = RagSystem(
@@ -168,13 +168,6 @@ rag_system = RagSystem(
 )
 ```
 
-## Model Compatibility
-
-This library is designed to work with any model that follows the Pleias RAG input/output format. It has been tested with:
-
-- Llama-based models with the appropriate fine-tuning
-- vLLM for efficient inference
-
 ## Requirements
 
 - Python 3.8+
@@ -182,12 +175,8 @@ This library is designed to work with any model that follows the Pleias RAG inpu
 - Sentence Transformers for embeddings
 - vLLM for efficient inference
 
-## License
 
-[Your license information here]
-
-
-# Pleias RAG Models
+# Information about Pleias RAG Models
 
 Pleias has developed a specialized line of language models designed specifically for Retrieval Augmented Generation (RAG). These models feature structured input/output formats to ensure accurate source citation and minimize hallucinations.
 
