@@ -1,6 +1,3 @@
-Here's the full README markdown in a code block for easy copying:
-
-```markdown
 # Pleias RAG
 
 Pleias RAG models are designed for Retrieval Augmented Generation (RAG) tasks. These models are optimized for structured input/output formats to ensure accurate source citation and minimize hallucinations.
@@ -17,7 +14,7 @@ The two main components of the library are:
 First, we describe the usage of the RagSystem, as it can also manage the database.
 
 ### Installation
-
+Clone the repository and install the package using pip:
 ```bash
 pip install .
 ```
