@@ -5,3 +5,30 @@ build-backend = "hatchling.build"
 [project]
 name = "Pleias_Rag"
 version = "0.1.0"
+description = "Retrieval-Augmented Generation system"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Mattia Nee", email = "mattia@pleias.fr"},
+]
+
+dependencies = [
+    "numpy",
+    "lancedb",
+    "sentence-transformers",
+    "vllm",
+    "pandas",
+    "torch",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "black",
+    "isort",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/Pleias_Rag"
+Issues = "https://github.com/yourusername/Pleias_Rag/issues"

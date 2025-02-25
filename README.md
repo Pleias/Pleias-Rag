@@ -4,6 +4,11 @@ Pleias RAG models are designed for Retrieval Augmented Generation (RAG) tasks. T
 
 This library serves the purpose of providing a simple interface to Pleias RAG models. It included both components for creating a database of sources, seaching for relevant sources and generating answers based on the sources. 
 
+# Main Components
+The two main components of the library are: 
+1. RagDatabase: Responsible for maintaining a database of sources and searching for relevant sources based on a query.
+2. RagSystem: Responsible for storing the database, loading the models, and generating answers based on user queries and retrieved sources.
+
 
 
 # Pleias RAG Models
