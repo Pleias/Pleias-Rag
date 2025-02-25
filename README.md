@@ -1,16 +1,156 @@
+Here's the full README markdown in a code block for easy copying:
+
+```markdown
 # Pleias RAG
 
 Pleias RAG models are designed for Retrieval Augmented Generation (RAG) tasks. These models are optimized for structured input/output formats to ensure accurate source citation and minimize hallucinations.
 
-This library serves the purpose of providing a simple interface to Pleias RAG models. It included both components for creating a database of sources, seaching for relevant sources and generating answers based on the sources. 
+This library serves the purpose of providing a simple interface to Pleias RAG models. It includes both components for creating a database of sources, searching for relevant sources and generating answers based on the sources. 
 
-# Main Components
+## Main Components
 The two main components of the library are: 
-1. RagDatabase: Responsible for maintaining a database of sources and searching for relevant sources based on a query.
-2. RagSystem: Responsible for storing the database, loading the models, and generating answers based on user queries and retrieved sources.
+1. **RagDatabase**: Responsible for maintaining a database of sources and searching for relevant sources based on a query.
+2. **RagSystem**: Responsible for storing the database, loading the models, and generating answers based on user queries and retrieved sources.
 
+## Usage
 
+First, we describe the usage of the RagSystem, as it can also manage the database.
 
+### Installation
+
+```bash
+pip install .
+```
+
+### Basic Usage
+
+```python
+from Pleias_Rag.main import RagSystem
+from Pleias_Rag.Generate import RAGGenerator
+
+# Initialize the RAG system
+rag_system = RagSystem(
+    search_type="vector",
+    db_path="data/rag_system_db",
+    embeddings_model="all-MiniLM-L6-v2",
+    chunk_size=300
+)
+
+# Add documents to the system
+rag_system.add_and_chunk_documents([
+    "Neural networks are a type of machine learning model inspired by the human brain.",
+    "GPT is a generative pre-trained transformer model developed by OpenAI.",
+    "RAG (Retrieval-Augmented Generation) combines retrieval systems with language models."
+])
+
+# Initialize the generator
+generator = RAGGenerator(
+    model_path="path/to/your/model"  # Replace with actual model path
+)
+
+# Set the generator in the system
+rag_system.set_generator(generator)
+
+# End-to-end RAG query
+query = "What are neural networks?"
+result = rag_system.query(query)
+
+# Access the results
+print(f"Query: {result['query']}")
+print(f"Response: {result['response']}")
+```
+
+### Document Management
+
+```python
+# Add documents with metadata
+rag_system.add_and_chunk_documents([
+    ("This is document with metadata", {"source": "website", "author": "John Doe"}),
+    "This is a plain document"
+])
+
+# Add pre-chunked documents
+chunks = ["Chunk 1", "Chunk 2", "Chunk 3"]
+rag_system.add_pre_chunked_documents(chunks, metadata={"source": "manual chunking"})
+
+# Get system stats
+stats = rag_system.get_stats()
+print(f"Documents: {stats['document_count']}")
+print(f"Chunks: {stats['chunk_count']}")
+```
+
+### Search and Format
+
+```python
+# Search for relevant documents
+query = "What is artificial intelligence?"
+results = rag_system.vector_search(query, limit=3)
+
+# Format the results for the model
+formatted_prompt = rag_system.format_for_rag_model(query, results)
+
+# Generate a response directly from formatted prompt
+response = generator.generate(formatted_prompt)
+```
+
+## Advanced Usage
+
+### Working with RagDatabase Directly
+
+For more control, you can work with the RagDatabase directly:
+
+```python
+from Pleias_Rag.RagDatabase import RagDatabase, Document
+
+# Initialize database
+db = RagDatabase(
+    search_type="vector",
+    default_max_segment=300,
+    db_path="data/lancedb", 
+    embeddings_model="all-MiniLM-L6-v2"
+)
+
+# Create Document objects
+doc1 = Document(text="Sample document text", metadata={"source": "research paper"})
+
+# Add documents
+db.add_and_chunk_documents([doc1, "Another document"])
+
+# Search
+results = db.vector_search("sample query", limit=5)
+```
+
+### Input/Output Format
+
+Pleias RAG models expect input in a specific format with special tokens:
+
+```
+<|query_start|>User query<|query_end|>
+<|source_start|><|source_id_start|>1<|source_id_end|>Source text 1<|source_end|>
+<|source_start|><|source_id_start|>2<|source_id_end|>Source text 2<|source_end|>
+<|source_analysis_start|>
+```
+
+The model will generate a response based on the provided sources.
+
+## Model Compatibility
+
+This library is designed to work with any model that follows the Pleias RAG input/output format. It has been tested with:
+
+- Llama-based models with the appropriate fine-tuning
+- vLLM for efficient inference
+
+## Requirements
+
+- Python 3.8+
+- LanceDB for vector storage
+- Sentence Transformers for embeddings
+- vLLM for efficient inference
+
+## License
+
+[Your license information here]
+```
 # Pleias RAG Models
 
 Pleias has developed a specialized line of language models designed specifically for Retrieval Augmented Generation (RAG). These models feature structured input/output formats to ensure accurate source citation and minimize hallucinations.
